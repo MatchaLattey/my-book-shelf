@@ -11,6 +11,7 @@
 
     body { background-color: transparent; display: flex; justify-content: center; padding: 10px; font-family: 'Segoe UI', sans-serif; }
     
+    /* SETTINGS MENU */
     #settings-container {
       position: fixed; top: 10px; right: 10px; z-index: 100;
       display: flex; flex-direction: column; align-items: flex-end;
@@ -18,11 +19,22 @@
     #gear-icon { font-size: 24px; cursor: pointer; background: white; border-radius: 50%; padding: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); opacity: 0.8; }
     #settings-menu {
       display: none; background: white; padding: 15px; border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4); width: 240px; margin-top: 8px; font-size: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4); width: 240px; margin-top: 8px; 
+      font-size: 12px; max-height: 80vh; overflow-y: auto;
     }
     #settings-container:hover #settings-menu { display: block; }
-    .setting-item { margin-bottom: 10px; }
-    .save-btn { width: 100%; padding: 8px; background: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer; }
+
+    .menu-header { font-weight: bold; font-size: 14px; margin-bottom: 15px; border-bottom: 2px solid #6b4f3a; padding-bottom: 5px; color: #6b4f3a; }
+    .setting-item { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+    .setting-item label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+    
+    select, input[type="text"] { width: 90%; padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 11px; margin-bottom: 8px; }
+    input[type="range"] { width: 90%; margin-top: 5px; cursor: pointer; }
+
+    .save-btn {
+      width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; 
+      border-radius: 6px; cursor: pointer; font-weight: bold;
+    }
 
     /* BOOKCASE */
     .bookcase {
@@ -40,36 +52,29 @@
       position: relative;
       background-color: var(--db-primary);
       background-image: radial-gradient(#20c20e 0.5px, transparent 0.5px), radial-gradient(#20c20e 0.5px, #0a3d4d 0.5px);
-      background-size: 8px 8px;
-      background-position: 0 0, 4px 4px;
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 3px 3px 0 0;
-      transition: transform 0.2s;
-      cursor: pointer;
+      background-size: 8px 8px; background-position: 0 0, 4px 4px;
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 3px 3px 0 0;
+      transition: transform 0.2s; cursor: pointer;
       display: flex; justify-content: center; align-items: center;
-      writing-mode: vertical-rl;
-      font-size: 9px; font-weight: bold; color: white;
-      text-transform: uppercase;
-      box-shadow: inset -3px 0 5px rgba(0,0,0,0.3);
+      writing-mode: vertical-rl; font-size: 9px; font-weight: bold; color: white;
+      text-transform: uppercase; box-shadow: inset -3px 0 5px rgba(0,0,0,0.3);
     }
-
     .book:hover { transform: translateY(-10px) scale(1.05) !important; z-index: 20; }
 
-    /* SIZES */
+    /* BOOK SIZES */
     .book-thin { width: 18px; height: 85px; font-size: 7px; }
     .book-standard { width: 30px; height: 105px; }
     .book-fat { width: 42px; height: 115px; border-left: 3px solid rgba(255,255,255,0.2); }
 
-    /* TILT EFFECT */
+    /* TILT CLASSES */
     .tilt-left { transform: rotate(-5deg); transform-origin: bottom; }
     .tilt-right { transform: rotate(5deg); transform-origin: bottom; }
 
     /* STATUS ICONS */
     .status-badge {
-      position: absolute; bottom: 4px; right: 4px;
-      width: 14px; height: 14px; border-radius: 50%;
-      background: white; display: flex; align-items: center; justify-content: center;
-      font-size: 10px; writing-mode: horizontal-tb;
+      position: absolute; bottom: 4px; right: 4px; width: 14px; height: 14px;
+      border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center;
+      font-size: 10px; writing-mode: horizontal-tb; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
     }
     .status-Read .status-badge::after { content: '✅'; }
     .status-Reading .status-badge::after { content: '📖'; }
@@ -84,11 +89,37 @@
   <div id="gear-icon">⚙️</div>
   <div id="settings-menu">
     <div class="menu-header">Shelf Settings</div>
+    
     <div class="setting-item">
-        <label>Wood Color</label>
-        <input type="color" id="colorPicker" onchange="updateColor(this.value)">
+      <label>Wood Color</label>
+      <input type="color" id="colorPicker" onchange="updateColor(this.value)">
     </div>
-    <button class="save-btn" onclick="saveSettings()">💾 SAVE DESIGN</button>
+    
+    <div class="setting-item">
+      <label>⏰ Item 1 (Clock)</label>
+      <input type="text" id="clockUrlInput" placeholder="Paste Image URL" onchange="updateDecoUrl('clock', this.value)">
+      <select id="clockShelfSelect" onchange="moveDeco('clock', this.value)">
+        <option value="1">Shelf 1</option><option value="2">Shelf 2</option>
+        <option value="3">Shelf 3</option><option value="4">Shelf 4</option>
+        <option value="none">Hidden</option>
+      </select>
+      <label style="font-weight:normal; font-size:10px;">Size Adjust</label>
+      <input type="range" id="clockSizeRange" min="20" max="150" oninput="resizeDeco('clock', this.value)">
+    </div>
+
+    <div class="setting-item">
+      <label>🪴 Item 2 (Plant)</label>
+      <input type="text" id="plantUrlInput" placeholder="Paste Image URL" onchange="updateDecoUrl('plant', this.value)">
+      <select id="plantShelfSelect" onchange="moveDeco('plant', this.value)">
+        <option value="1">Shelf 1</option><option value="2">Shelf 2</option>
+        <option value="3">Shelf 3</option><option value="4">Shelf 4</option>
+        <option value="none">Hidden</option>
+      </select>
+      <label style="font-weight:normal; font-size:10px;">Size Adjust</label>
+      <input type="range" id="plantSizeRange" min="20" max="150" oninput="resizeDeco('plant', this.value)">
+    </div>
+
+    <button class="save-btn" onclick="saveSettings()">💾 SAVE MY DESIGN</button>
   </div>
 </div>
 
@@ -108,43 +139,79 @@
     clockShelf: '2', plantShelf: '3', clockSize: '45', plantSize: '60'
   };
 
+  function loadSettings() {
+    const saved = localStorage.getItem('bookshelf_settings');
+    if (saved) {
+      config = JSON.parse(saved);
+      document.getElementById('colorPicker').value = config.color;
+      document.getElementById('clockUrlInput').value = config.clockImg;
+      document.getElementById('plantUrlInput').value = config.plantImg;
+      document.getElementById('clockShelfSelect').value = config.clockShelf;
+      document.getElementById('plantShelfSelect').value = config.plantShelf;
+      document.getElementById('clockSizeRange').value = config.clockSize;
+      document.getElementById('plantSizeRange').value = config.plantSize;
+      updateColor(config.color);
+    }
+  }
+
+  function saveSettings() {
+    localStorage.setItem('bookshelf_settings', JSON.stringify(config));
+    alert("Saved! Your design is now locked in.");
+  }
+
   function updateColor(val) { 
     config.color = val;
     document.documentElement.style.setProperty('--frame-color', val); 
   }
 
+  function resizeDeco(type, val) {
+    config[type + 'Size'] = val;
+    const img = document.getElementById(type + '-id');
+    if (img) img.style.width = val + 'px';
+  }
+
+  function updateDecoUrl(type, url) {
+    if (!url) return;
+    if (type === 'clock') config.clockImg = url;
+    if (type === 'plant') config.plantImg = url;
+    moveDeco(type, config[type + 'Shelf']);
+  }
+
   function moveDeco(type, shelfId) {
+    config[type + 'Shelf'] = shelfId;
     const old = document.getElementById(type + '-id');
     if (old) old.remove();
     if (shelfId === 'none') return;
+
     const shelf = document.getElementById(`shelf-${shelfId}`);
     const img = document.createElement('img');
     img.id = type + '-id';
     img.src = type === 'clock' ? config.clockImg : config.plantImg;
     img.className = 'deco';
     img.style.width = config[type + 'Size'] + 'px';
-    if (type === 'clock') img.style.right = '10px'; else img.style.left = '10px';
+    if (type === 'clock') img.style.right = '10px'; 
+    else { img.style.left = '10px'; }
     shelf.appendChild(img);
   }
 
   async function fetchBooks() {
+    loadSettings();
     try {
       const response = await fetch(config.workerUrl);
       const books = await response.json();
       
-      // FIX: Instead of clearing the whole shelf, only remove existing books
+      // Clear ONLY books, leave decorations
       document.querySelectorAll('.book').forEach(b => b.remove());
       
-      // Re-draw deco if they aren't there
-      if(!document.getElementById('clock-id')) moveDeco('clock', config.clockShelf);
-      if(!document.getElementById('plant-id')) moveDeco('plant', config.plantShelf);
+      moveDeco('clock', config.clockShelf);
+      moveDeco('plant', config.plantShelf);
 
       books.forEach(book => {
         const shelf = document.getElementById(`shelf-${book.shelf}`);
         if (shelf) {
           const el = document.createElement('div');
           
-          // Random size & tilt for organic look
+          // Automatic size and tilt
           const sizes = ['book-thin', 'book-standard', 'book-fat'];
           const tilts = ['', 'tilt-left', 'tilt-right', '']; 
           const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
