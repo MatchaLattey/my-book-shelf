@@ -121,10 +121,20 @@
   function getStatusEmoji(status) {
     if (!status) return "";
     const s = status.toLowerCase().trim();
-    if (s.includes("done")) return "✨";
-    if (s.includes("reading")) return "🌱";
-    if (s.includes("going")) return "📖";
-    if (s.includes("read")) return "⏳";
+
+    // 1. Done (The Sparkle)
+    if (s.includes("done")) return "✨"; 
+    
+    // 2. Reading (The Seedling - currently in your hands)
+    // We check for "reading" first so it doesn't get caught by "going"
+    if (s.includes("reading")) return "🌱"; 
+    
+    // 3. On-going (The Open Book - for series or manga)
+    if (s.includes("going")) return "📖"; 
+
+    // 4. To Read (The Hourglass - waiting on the shelf)
+    if (s.includes("read")) return "⏳"; 
+
     return "";
   }
 
