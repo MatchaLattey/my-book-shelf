@@ -29,6 +29,12 @@
     select, input[type="text"] { width: 95%; padding: 4px; border-radius: 4px; border: 1px solid #ccc; font-size: 10px; margin-bottom: 5px; }
     input[type="range"] { width: 95%; cursor: pointer; }
 
+    .save-btn {
+      width: 100%; padding: 8px; background: #6b4f3a; color: white; border: none; 
+      border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 5px;
+    }
+    .save-btn:hover { background: #513b2c; }
+
     /* BOOKCASE */
     .bookcase {
       width: 100%; max-width: 450px; background: var(--frame-color);
@@ -59,36 +65,36 @@
   <div id="settings-menu">
     <div class="setting-item">
       <label>Wood Color</label>
-      <input type="color" id="colorPicker" value="#b68d6d" onchange="updateColor(this.value)">
+      <input type="color" id="colorPicker" onchange="updateColor(this.value)">
     </div>
     
     <div class="setting-item">
       <label>⏰ Item 1 (Clock)</label>
-      <input type="text" placeholder="Paste Image URL" onchange="updateDecoUrl('clock', this.value)">
-      <select onchange="moveDeco('clock', this.value)">
+      <input type="text" id="clockUrlInput" placeholder="Paste Image URL" onchange="updateDecoUrl('clock', this.value)">
+      <select id="clockShelfSelect" onchange="moveDeco('clock', this.value)">
         <option value="1">Shelf 1</option>
-        <option value="2" selected>Shelf 2</option>
+        <option value="2">Shelf 2</option>
         <option value="3">Shelf 3</option>
         <option value="4">Shelf 4</option>
         <option value="none">Hidden</option>
       </select>
-      <label style="font-weight:normal; font-size:9px; margin-top:5px;">Size</label>
-      <input type="range" min="20" max="150" value="45" oninput="resizeDeco('clock', this.value)">
+      <input type="range" id="clockSizeRange" min="20" max="150" oninput="resizeDeco('clock', this.value)">
     </div>
 
     <div class="setting-item">
       <label>🪴 Item 2 (Plant)</label>
-      <input type="text" placeholder="Paste Image URL" onchange="updateDecoUrl('plant', this.value)">
-      <select onchange="moveDeco('plant', this.value)">
+      <input type="text" id="plantUrlInput" placeholder="Paste Image URL" onchange="updateDecoUrl('plant', this.value)">
+      <select id="plantShelfSelect" onchange="moveDeco('plant', this.value)">
         <option value="1">Shelf 1</option>
         <option value="2">Shelf 2</option>
-        <option value="3" selected>Shelf 3</option>
+        <option value="3">Shelf 3</option>
         <option value="4">Shelf 4</option>
         <option value="none">Hidden</option>
       </select>
-      <label style="font-weight:normal; font-size:9px; margin-top:5px;">Size</label>
-      <input type="range" min="20" max="150" value="60" oninput="resizeDeco('plant', this.value)">
+      <input type="range" id="plantSizeRange" min="20" max="150" oninput="resizeDeco('plant', this.value)">
     </div>
+
+    <button class="save-btn" onclick="saveSettings()">💾 Save Permanently</button>
   </div>
 </div>
 
@@ -100,21 +106,44 @@
 </div>
 
 <script>
+  // THIS USES YOUR REAL WORKER URL
   let config = {
-    workerUrl: 'https://notion-bridge.violily67.workers.dev/', // REPLACE ME
+    workerUrl: 'https://notion-bridge.violily67.workers.dev/', 
+    color: '#b68d6d',
     clockImg: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3B4eW13bmZ5ZnR4eW13bmZ5ZnR4eW13bmZ5ZnR4eW13bmZ5JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKVUn7iM8FMEU24/giphy.gif',
     plantImg: 'https://i.pinimg.com/originals/1f/4e/ba/1f4eba6f27790b213ba570f8ba63273c.gif',
     clockShelf: '2',
     plantShelf: '3',
-    clockSize: '45px',
-    plantSize: '60px'
+    clockSize: '45',
+    plantSize: '60'
   };
 
-  function updateColor(val) { document.documentElement.style.setProperty('--frame-color', val); }
+  function loadSettings() {
+    const saved = localStorage.getItem('bookshelf_settings');
+    if (saved) {
+      config = JSON.parse(saved);
+      document.getElementById('colorPicker').value = config.color;
+      document.getElementById('clockShelfSelect').value = config.clockShelf;
+      document.getElementById('plantShelfSelect').value = config.plantShelf;
+      document.getElementById('clockSizeRange').value = config.clockSize;
+      document.getElementById('plantSizeRange').value = config.plantSize;
+      updateColor(config.color);
+    }
+  }
+
+  function saveSettings() {
+    localStorage.setItem('bookshelf_settings', JSON.stringify(config));
+    alert("Saved! Your plant and clock will now stay here.");
+  }
+
+  function updateColor(val) { 
+    config.color = val;
+    document.documentElement.style.setProperty('--frame-color', val); 
+  }
 
   function resizeDeco(type, val) {
+    config[type + 'Size'] = val;
     const img = document.getElementById(type + '-id');
-    config[type + 'Size'] = val + 'px';
     if (img) img.style.width = val + 'px';
   }
 
@@ -122,13 +151,11 @@
     if (!url) return;
     if (type === 'clock') config.clockImg = url;
     if (type === 'plant') config.plantImg = url;
-    moveDeco(type, type === 'clock' ? config.clockShelf : config.plantShelf);
+    moveDeco(type, config[type + 'Shelf']);
   }
 
   function moveDeco(type, shelfId) {
-    if (type === 'clock') config.clockShelf = shelfId;
-    if (type === 'plant') config.plantShelf = shelfId;
-
+    config[type + 'Shelf'] = shelfId;
     const old = document.getElementById(type + '-id');
     if (old) old.remove();
     if (shelfId === 'none') return;
@@ -138,7 +165,7 @@
     img.id = type + '-id';
     img.src = type === 'clock' ? config.clockImg : config.plantImg;
     img.className = 'deco';
-    img.style.width = type === 'clock' ? config.clockSize : config.plantSize;
+    img.style.width = config[type + 'Size'] + 'px';
     
     if (type === 'clock') { img.style.right = '10px'; } 
     else { img.style.left = '50%'; img.style.transform = 'translateX(-50%)'; }
@@ -147,6 +174,7 @@
   }
 
   async function fetchBooks() {
+    loadSettings();
     try {
       const response = await fetch(config.workerUrl);
       const books = await response.json();
