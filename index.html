@@ -10,17 +10,34 @@
       --book-tbr: #eed9c1;
     }
 
-    body { background-color: transparent; display: flex; justify-content: center; padding: 10px; font-family: sans-serif; }
+    body { background-color: transparent; display: flex; justify-content: center; padding: 10px; font-family: 'Segoe UI', sans-serif; }
+    
+    /* SETTINGS PANEL STYLES */
+    #settings-container {
+      position: fixed; top: 10px; right: 10px; z-index: 100;
+      display: flex; flex-direction: column; align-items: flex-end;
+    }
+    #gear-icon { font-size: 20px; cursor: pointer; background: white; border-radius: 50%; padding: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    #settings-menu {
+      display: none; background: white; padding: 15px; border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 180px; margin-top: 5px; font-size: 13px;
+    }
+    #settings-container:hover #settings-menu { display: block; }
+    .setting-item { margin-bottom: 10px; }
+    .setting-item label { display: block; margin-bottom: 3px; font-weight: bold; }
+
+    /* BOOKCASE STYLES */
     .bookcase {
       width: 100%; max-width: 450px; background: var(--frame-color);
       display: grid; grid-template-rows: repeat(4, 1fr); gap: 15px;
-      padding: 20px; border: 10px solid #a37a5a; border-radius: 4px;
+      padding: 20px; border: 10px solid #a37a5a; border-radius: 4px; transition: background 0.3s;
     }
     .shelf {
       height: 130px; background-color: var(--shelf-bg); border-bottom: 10px solid #a37a5a;
       display: flex; align-items: flex-end; padding: 0 15px; gap: 6px; position: relative;
     }
-    .deco { position: absolute; bottom: 5px; z-index: 5; pointer-events: none; }
+    .deco { position: absolute; bottom: 5px; z-index: 5; pointer-events: none; transition: opacity 0.3s; }
+    
     .book {
       width: 32px; writing-mode: vertical-rl; text-align: center; font-size: 11px; font-weight: bold;
       color: #5d4037; border: 1px solid rgba(0,0,0,0.1); border-radius: 3px 3px 0 0;
@@ -34,7 +51,22 @@
 </head>
 <body>
 
-<div class="bookcase">
+<div id="settings-container">
+  <div id="gear-icon">⚙️</div>
+  <div id="settings-menu">
+    <div class="setting-item">
+      <label>Wood Color</label>
+      <input type="color" id="colorPicker" value="#b68d6d" onchange="updateColor(this.value)">
+    </div>
+    <div class="setting-item">
+      <label>Decorations</label>
+      <input type="checkbox" id="showDecos" checked onchange="toggleDecos(this.checked)"> Show Items
+    </div>
+    <p style="font-size: 10px; color: #888;">Note: Changes reset on refresh unless saved in code.</p>
+  </div>
+</div>
+
+<div class="bookcase" id="main-bookcase">
   <div class="shelf" id="shelf-1"></div>
   <div class="shelf" id="shelf-2"></div>
   <div class="shelf" id="shelf-3"></div>
@@ -42,35 +74,20 @@
 </div>
 
 <script>
-  // ==========================================
-  // ⚙️ MANAGE YOUR SETTINGS HERE
-  // ==========================================
+  // 1. YOUR CONFIGURATION
   const CONFIG = {
-    workerUrl: 'https://your-worker-name.workers.dev',
-    
+    workerUrl: 'https://your-worker-name.workers.dev', // PLACE YOUR URL HERE
     decorations: [
-      {
-        name: 'Clock',
-        url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3B4eW13bmZ5ZnR4eW13bmZ5ZnR4eW13bmZ5ZnR4eW13bmZ5JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKVUn7iM8FMEU24/giphy.gif',
-        shelf: 2,         // Which shelf (1-4)
-        position: 'right', // 'left', 'center', or 'right'
-        width: '50px'     // Size
-      },
-      {
-        name: 'Plant',
-        url: 'https://i.pinimg.com/originals/1f/4e/ba/1f4eba6f27790b213ba570f8ba63273c.gif',
-        shelf: 3, 
-        position: 'center',
-        width: '65px'
-      }
-      // You can add more decorations here easily!
+      { name: 'Clock', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3B4eW13bmZ5ZnR4eW13bmZ5ZnR4eW13bmZ5ZnR4eW13bmZ5JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKVUn7iM8FMEU24/giphy.gif', shelf: 2, pos: 'right', width: '50px' },
+      { name: 'Plant', url: 'https://i.pinimg.com/originals/1f/4e/ba/1f4eba6f27790b213ba570f8ba63273c.gif', shelf: 3, pos: 'center', width: '65px' }
     ]
   };
 
-  // ==========================================
-  // CORE LOGIC (Don't touch unless you're brave)
-  // ==========================================
-  
+  // 2. SETTINGS FUNCTIONS
+  function updateColor(val) { document.documentElement.style.setProperty('--frame-color', val); }
+  function toggleDecos(show) { document.querySelectorAll('.deco').forEach(d => d.style.opacity = show ? '1' : '0'); }
+
+  // 3. BOOKCASE LOGIC
   function placeDecorations() {
     CONFIG.decorations.forEach(d => {
       const shelf = document.getElementById(`shelf-${d.shelf}`);
@@ -79,15 +96,9 @@
         img.src = d.url;
         img.className = 'deco';
         img.style.width = d.width;
-        
-        if (d.position === 'center') {
-          img.style.left = '50%';
-          img.style.transform = 'translateX(-50%)';
-        } else if (d.position === 'left') {
-          img.style.left = '10px';
-        } else {
-          img.style.right = '10px';
-        }
+        if (d.pos === 'center') { img.style.left = '50%'; img.style.transform = 'translateX(-50%)'; }
+        else if (d.pos === 'left') { img.style.left = '10px'; }
+        else { img.style.right = '10px'; }
         shelf.appendChild(img);
       }
     });
@@ -97,15 +108,14 @@
     try {
       const response = await fetch(CONFIG.workerUrl);
       const books = await response.json();
-      placeDecorations(); // Place items after books or before
-      
+      placeDecorations();
       books.forEach(book => {
         const shelf = document.getElementById(`shelf-${book.shelf}`);
         if (shelf) {
           const el = document.createElement('div');
           el.className = `book status-${book.status}`;
           el.title = book.title;
-          el.innerText = book.title.length > 12 ? book.title.substring(0, 10) + '..' : book.title;
+          el.innerText = book.title.substring(0, 10);
           shelf.appendChild(el);
         }
       });
