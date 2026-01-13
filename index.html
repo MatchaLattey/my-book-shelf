@@ -1,72 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    :root {
-      --shelf-color: #ba8e6c;
-      --bg-color: #f5e6d3;
-      --book-read: #d8b08c;
-      --book-reading: #a67c52;
-      --book-tbr: #eed9c1;
-    }
+body { 
+  background-color: #fdf6ed; /* Warm cream background */
+}
 
-    body { background-color: var(--bg-color); display: flex; justify-content: center; padding: 20px; font-family: 'Courier New', Courier, monospace; }
+.bookcase {
+  display: grid;
+  grid-template-rows: repeat(4, 1fr); /* Creates the 4 shelves */
+  gap: 10px;
+  background: #b68d6d; /* Wood frame color */
+  padding: 15px;
+  border: 10px solid #a37a5a;
+  box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+}
 
-    .bookcase {
-      width: 400px;
-      background: #966f50;
-      padding: 10px;
-      border: 8px solid var(--shelf-color);
-      border-radius: 4px;
-    }
-
-    .shelf {
-      height: 100px;
-      border-bottom: 12px solid var(--shelf-color);
-      display: flex;
-      align-items: flex-end;
-      padding: 0 10px;
-      gap: 4px;
-      position: relative;
-      background-image: radial-gradient(#ffffff 1px, transparent 1px);
-      background-size: 15px 15px; /* Grid pattern like your image */
-    }
-
-    .book {
-      width: 25px;
-      writing-mode: vertical-rl;
-      text-align: center;
-      font-size: 9px;
-      color: #5d4037;
-      border: 1px solid rgba(0,0,0,0.1);
-      border-radius: 2px 2px 0 0;
-      overflow: hidden;
-      cursor: pointer;
-    }
-
-    .status-Read { background: var(--book-read); height: 70px; }
-    .status-Reading { background: var(--book-reading); height: 85px; color: white; }
-    .status-TBR { background: var(--book-tbr); height: 60px; }
-
-    /* Decoration Placeholders */
-    .shelf:nth-child(2)::after { content: '⏰'; position: absolute; right: 10px; bottom: 5px; font-size: 24px; }
-    .shelf:nth-child(3)::after { content: '🪴'; position: absolute; right: 40px; bottom: 5px; font-size: 20px; }
-  </style>
-</head>
-<body>
-
-<div class="bookcase" id="bookcase">
-  <div class="shelf" id="shelf-1"></div>
-  <div class="shelf" id="shelf-2"></div>
-  <div class="shelf" id="shelf-3"></div>
-  <div class="shelf" id="shelf-4"></div>
-</div>
-
-<script>
-  // TO CONNECT NOTION: We need to fetch your data. 
-  // For now, this is a placeholder. To make this live, 
-  // you'll use a 'Notion API' fetch call here.
-</script>
-
-</body>
-</html>
+.shelf {
+  background-color: #fffaf2;
+  background-image: radial-gradient(#e6e0d5 1px, transparent 1px);
+  background-size: 20px 20px; /* The grid pattern from your image */
+  height: 120px;
+  border-bottom: 8px solid #a37a5a;
+  display: flex;
+  align-items: flex-end;
+  padding-left: 10px;
+  position: relative;
+}
