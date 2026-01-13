@@ -24,15 +24,16 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 220px; margin-top: 5px; font-size: 11px;
     }
     #settings-container:hover #settings-menu { display: block; }
-    .setting-item { margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-    .setting-item label { display: block; margin-bottom: 2px; font-weight: bold; color: #444; }
-    select, input { width: 95%; padding: 4px; border-radius: 4px; border: 1px solid #ccc; font-size: 10px; }
+    .setting-item { margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+    .setting-item label { display: block; margin-bottom: 4px; font-weight: bold; color: #444; }
+    select, input[type="text"] { width: 95%; padding: 4px; border-radius: 4px; border: 1px solid #ccc; font-size: 10px; margin-bottom: 5px; }
+    input[type="range"] { width: 95%; cursor: pointer; }
 
     /* BOOKCASE */
     .bookcase {
       width: 100%; max-width: 450px; background: var(--frame-color);
       display: grid; grid-template-rows: repeat(4, 1fr); gap: 15px;
-      padding: 20px; border: 10px solid #a37a5a; border-radius: 4px; transition: background 0.3s;
+      padding: 20px; border: 10px solid #a37a5a; border-radius: 4px;
     }
     .shelf {
       height: 125px; background-color: var(--shelf-bg); border-bottom: 10px solid #a37a5a;
@@ -63,7 +64,7 @@
     
     <div class="setting-item">
       <label>⏰ Item 1 (Clock)</label>
-      <input type="text" id="clockUrl" placeholder="Paste Image URL" onchange="updateDecoUrl('clock', this.value)">
+      <input type="text" placeholder="Paste Image URL" onchange="updateDecoUrl('clock', this.value)">
       <select onchange="moveDeco('clock', this.value)">
         <option value="1">Shelf 1</option>
         <option value="2" selected>Shelf 2</option>
@@ -71,11 +72,13 @@
         <option value="4">Shelf 4</option>
         <option value="none">Hidden</option>
       </select>
+      <label style="font-weight:normal; font-size:9px; margin-top:5px;">Size</label>
+      <input type="range" min="20" max="150" value="45" oninput="resizeDeco('clock', this.value)">
     </div>
 
     <div class="setting-item">
       <label>🪴 Item 2 (Plant)</label>
-      <input type="text" id="plantUrl" placeholder="Paste Image URL" onchange="updateDecoUrl('plant', this.value)">
+      <input type="text" placeholder="Paste Image URL" onchange="updateDecoUrl('plant', this.value)">
       <select onchange="moveDeco('plant', this.value)">
         <option value="1">Shelf 1</option>
         <option value="2">Shelf 2</option>
@@ -83,11 +86,13 @@
         <option value="4">Shelf 4</option>
         <option value="none">Hidden</option>
       </select>
+      <label style="font-weight:normal; font-size:9px; margin-top:5px;">Size</label>
+      <input type="range" min="20" max="150" value="60" oninput="resizeDeco('plant', this.value)">
     </div>
   </div>
 </div>
 
-<div class="bookcase" id="main-bookcase">
+<div class="bookcase">
   <div class="shelf" id="shelf-1"></div>
   <div class="shelf" id="shelf-2"></div>
   <div class="shelf" id="shelf-3"></div>
@@ -100,10 +105,18 @@
     clockImg: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3B4eW13bmZ5ZnR4eW13bmZ5ZnR4eW13bmZ5ZnR4eW13bmZ5JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKVUn7iM8FMEU24/giphy.gif',
     plantImg: 'https://i.pinimg.com/originals/1f/4e/ba/1f4eba6f27790b213ba570f8ba63273c.gif',
     clockShelf: '2',
-    plantShelf: '3'
+    plantShelf: '3',
+    clockSize: '45px',
+    plantSize: '60px'
   };
 
   function updateColor(val) { document.documentElement.style.setProperty('--frame-color', val); }
+
+  function resizeDeco(type, val) {
+    const img = document.getElementById(type + '-id');
+    config[type + 'Size'] = val + 'px';
+    if (img) img.style.width = val + 'px';
+  }
 
   function updateDecoUrl(type, url) {
     if (!url) return;
@@ -125,9 +138,10 @@
     img.id = type + '-id';
     img.src = type === 'clock' ? config.clockImg : config.plantImg;
     img.className = 'deco';
+    img.style.width = type === 'clock' ? config.clockSize : config.plantSize;
     
-    if (type === 'clock') { img.style.width = '45px'; img.style.right = '10px'; } 
-    else { img.style.width = '60px'; img.style.left = '50%'; img.style.transform = 'translateX(-50%)'; }
+    if (type === 'clock') { img.style.right = '10px'; } 
+    else { img.style.left = '50%'; img.style.transform = 'translateX(-50%)'; }
     
     shelf.appendChild(img);
   }
