@@ -1,68 +1,72 @@
-<div class="bookshelf-container">
-  <div class="shelf">
-    <div class="book status-read" title="The Great Gatsby">Gatsby</div>
-    <div class="book status-read" title="Atomic Habits">Habits</div>
-    
-    <div class="book status-reading" title="Dune">Dune</div>
-    
-    <div class="book status-tbr" title="1984">1984</div>
-    <div class="book status-tbr" title="Project Hail Mary">PHM</div>
-  </div>
-  
-  <div class="legend">
-    <span class="dot read"></span> Read
-    <span class="dot reading"></span> Reading
-    <span class="dot tbr"></span> To Read
-  </div>
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    :root {
+      --shelf-color: #ba8e6c;
+      --bg-color: #f5e6d3;
+      --book-read: #d8b08c;
+      --book-reading: #a67c52;
+      --book-tbr: #eed9c1;
+    }
+
+    body { background-color: var(--bg-color); display: flex; justify-content: center; padding: 20px; font-family: 'Courier New', Courier, monospace; }
+
+    .bookcase {
+      width: 400px;
+      background: #966f50;
+      padding: 10px;
+      border: 8px solid var(--shelf-color);
+      border-radius: 4px;
+    }
+
+    .shelf {
+      height: 100px;
+      border-bottom: 12px solid var(--shelf-color);
+      display: flex;
+      align-items: flex-end;
+      padding: 0 10px;
+      gap: 4px;
+      position: relative;
+      background-image: radial-gradient(#ffffff 1px, transparent 1px);
+      background-size: 15px 15px; /* Grid pattern like your image */
+    }
+
+    .book {
+      width: 25px;
+      writing-mode: vertical-rl;
+      text-align: center;
+      font-size: 9px;
+      color: #5d4037;
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 2px 2px 0 0;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .status-Read { background: var(--book-read); height: 70px; }
+    .status-Reading { background: var(--book-reading); height: 85px; color: white; }
+    .status-TBR { background: var(--book-tbr); height: 60px; }
+
+    /* Decoration Placeholders */
+    .shelf:nth-child(2)::after { content: '⏰'; position: absolute; right: 10px; bottom: 5px; font-size: 24px; }
+    .shelf:nth-child(3)::after { content: '🪴'; position: absolute; right: 40px; bottom: 5px; font-size: 20px; }
+  </style>
+</head>
+<body>
+
+<div class="bookcase" id="bookcase">
+  <div class="shelf" id="shelf-1"></div>
+  <div class="shelf" id="shelf-2"></div>
+  <div class="shelf" id="shelf-3"></div>
+  <div class="shelf" id="shelf-4"></div>
 </div>
 
-<style>
-  .bookshelf-container {
-    background: #f4ece1;
-    padding: 20px;
-    border-radius: 8px;
-    width: fit-content;
-    font-family: sans-serif;
-  }
+<script>
+  // TO CONNECT NOTION: We need to fetch your data. 
+  // For now, this is a placeholder. To make this live, 
+  // you'll use a 'Notion API' fetch call here.
+</script>
 
-  .shelf {
-    display: flex;
-    align-items: flex-end;
-    border-bottom: 8px solid #5d4037; /* The wood shelf */
-    padding-bottom: 2px;
-    gap: 5px;
-  }
-
-  .book {
-    width: 30px;
-    color: white;
-    font-size: 10px;
-    writing-mode: vertical-rl;
-    text-align: center;
-    padding: 10px 0;
-    border-radius: 3px 3px 0 0;
-    cursor: help;
-    transition: transform 0.2s;
-  }
-
-  .book:hover {
-    transform: translateY(-10px);
-  }
-
-  /* Status Colors */
-  .status-read { background: #2e7d32; height: 80px; }    /* Green */
-  .status-reading { background: #1976d2; height: 95px; } /* Blue */
-  .status-tbr { background: #ed6c02; height: 70px; }     /* Orange */
-
-  .legend {
-    margin-top: 15px;
-    font-size: 12px;
-    display: flex;
-    gap: 10px;
-  }
-
-  .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
-  .read { background: #2e7d32; }
-  .reading { background: #1976d2; }
-  .tbr { background: #ed6c02; }
-</style>
+</body>
+</html>
