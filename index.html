@@ -12,21 +12,21 @@
 
     body { background-color: transparent; display: flex; justify-content: center; padding: 10px; font-family: 'Segoe UI', sans-serif; }
     
-    /* INTERACTIVE SETTINGS MENU */
+    /* SETTINGS MENU */
     #settings-container {
       position: fixed; top: 10px; right: 10px; z-index: 100;
       display: flex; flex-direction: column; align-items: flex-end;
     }
-    #gear-icon { font-size: 20px; cursor: pointer; background: white; border-radius: 50%; padding: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); opacity: 0.3; transition: opacity 0.3s; }
+    #gear-icon { font-size: 20px; cursor: pointer; background: white; border-radius: 50%; padding: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); opacity: 0.2; transition: opacity 0.3s; }
     #settings-container:hover #gear-icon { opacity: 1; }
     #settings-menu {
       display: none; background: white; padding: 12px; border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 160px; margin-top: 5px; font-size: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 220px; margin-top: 5px; font-size: 11px;
     }
     #settings-container:hover #settings-menu { display: block; }
-    .setting-item { margin-bottom: 8px; }
-    .setting-item label { display: block; margin-bottom: 2px; font-weight: bold; color: #555; }
-    select, input { width: 100%; padding: 2px; border-radius: 4px; border: 1px solid #ccc; }
+    .setting-item { margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+    .setting-item label { display: block; margin-bottom: 2px; font-weight: bold; color: #444; }
+    select, input { width: 95%; padding: 4px; border-radius: 4px; border: 1px solid #ccc; font-size: 10px; }
 
     /* BOOKCASE */
     .bookcase {
@@ -57,12 +57,14 @@
   <div id="gear-icon">⚙️</div>
   <div id="settings-menu">
     <div class="setting-item">
-      <label>Wood Style</label>
+      <label>Wood Color</label>
       <input type="color" id="colorPicker" value="#b68d6d" onchange="updateColor(this.value)">
     </div>
+    
     <div class="setting-item">
-      <label>⏰ Clock Shelf</label>
-      <select id="clockShelf" onchange="moveDeco('clock', this.value)">
+      <label>⏰ Item 1 (Clock)</label>
+      <input type="text" id="clockUrl" placeholder="Paste Image URL" onchange="updateDecoUrl('clock', this.value)">
+      <select onchange="moveDeco('clock', this.value)">
         <option value="1">Shelf 1</option>
         <option value="2" selected>Shelf 2</option>
         <option value="3">Shelf 3</option>
@@ -70,9 +72,11 @@
         <option value="none">Hidden</option>
       </select>
     </div>
+
     <div class="setting-item">
-      <label>🪴 Plant Shelf</label>
-      <select id="plantShelf" onchange="moveDeco('plant', this.value)">
+      <label>🪴 Item 2 (Plant)</label>
+      <input type="text" id="plantUrl" placeholder="Paste Image URL" onchange="updateDecoUrl('plant', this.value)">
+      <select onchange="moveDeco('plant', this.value)">
         <option value="1">Shelf 1</option>
         <option value="2">Shelf 2</option>
         <option value="3" selected>Shelf 3</option>
@@ -91,47 +95,49 @@
 </div>
 
 <script>
-  const CONFIG = {
-    workerUrl: 'https://your-worker-name.workers.dev', // REPLACE WITH YOUR URL
+  let config = {
+    workerUrl: 'https://your-worker-name.workers.dev', // REPLACE ME
     clockImg: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3B4eW13bmZ5ZnR4eW13bmZ5ZnR4eW13bmZ5ZnR4eW13bmZ5JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKVUn7iM8FMEU24/giphy.gif',
-    plantImg: 'https://i.pinimg.com/originals/1f/4e/ba/1f4eba6f27790b213ba570f8ba63273c.gif'
+    plantImg: 'https://i.pinimg.com/originals/1f/4e/ba/1f4eba6f27790b213ba570f8ba63273c.gif',
+    clockShelf: '2',
+    plantShelf: '3'
   };
 
   function updateColor(val) { document.documentElement.style.setProperty('--frame-color', val); }
 
+  function updateDecoUrl(type, url) {
+    if (!url) return;
+    if (type === 'clock') config.clockImg = url;
+    if (type === 'plant') config.plantImg = url;
+    moveDeco(type, type === 'clock' ? config.clockShelf : config.plantShelf);
+  }
+
   function moveDeco(type, shelfId) {
-    // Remove old one if exists
+    if (type === 'clock') config.clockShelf = shelfId;
+    if (type === 'plant') config.plantShelf = shelfId;
+
     const old = document.getElementById(type + '-id');
     if (old) old.remove();
-
     if (shelfId === 'none') return;
 
     const shelf = document.getElementById(`shelf-${shelfId}`);
     const img = document.createElement('img');
     img.id = type + '-id';
-    img.src = type === 'clock' ? CONFIG.clockImg : CONFIG.plantImg;
+    img.src = type === 'clock' ? config.clockImg : config.plantImg;
     img.className = 'deco';
     
-    // Set specific position for each
-    if (type === 'clock') {
-        img.style.width = '45px';
-        img.style.right = '10px';
-    } else {
-        img.style.width = '60px';
-        img.style.left = '50%';
-        img.style.transform = 'translateX(-50%)';
-    }
+    if (type === 'clock') { img.style.width = '45px'; img.style.right = '10px'; } 
+    else { img.style.width = '60px'; img.style.left = '50%'; img.style.transform = 'translateX(-50%)'; }
+    
     shelf.appendChild(img);
   }
 
   async function fetchBooks() {
     try {
-      const response = await fetch(CONFIG.workerUrl);
+      const response = await fetch(config.workerUrl);
       const books = await response.json();
-      
-      // Initial placement
-      moveDeco('clock', '2');
-      moveDeco('plant', '3');
+      moveDeco('clock', config.clockShelf);
+      moveDeco('plant', config.plantShelf);
 
       books.forEach(book => {
         const shelf = document.getElementById(`shelf-${book.shelf}`);
