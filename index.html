@@ -42,24 +42,23 @@
       position: relative;
     }
 
-    /* Clock Decoration on Shelf 2 */
-    .shelf#shelf-2::after {
-      content: '⏰';
+    /* Decoration Styling */
+    .deco {
       position: absolute;
-      right: 15px;
       bottom: 5px;
-      font-size: 35px;
+      z-index: 5;
+      pointer-events: none; /* Allows you to still hover books behind it */
     }
 
-    /* Animated Plant Decoration on Shelf 3 */
-    .plant-deco {
-      position: absolute;
+    .clock-gif {
+      right: 15px;
+      width: 50px;
+    }
+
+    .plant-gif {
       left: 50%;
-      bottom: 10px; /* Sits on the shelf */
       transform: translateX(-50%);
-      width: 60px;  /* Adjust size as needed */
-      height: auto;
-      z-index: 5;
+      width: 65px;
     }
 
     .book {
@@ -78,7 +77,6 @@
       align-items: center;
       text-transform: uppercase;
       letter-spacing: 1px;
-      background-size: cover;
     }
 
     .book:hover { transform: translateY(-10px); z-index: 10; }
@@ -92,9 +90,11 @@
 
 <div class="bookcase">
   <div class="shelf" id="shelf-1"></div>
-  <div class="shelf" id="shelf-2"></div>
+  <div class="shelf" id="shelf-2">
+    <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3B4eW13bmZ5ZnR4eW13bmZ5ZnR4eW13bmZ5ZnR4eW13bmZ5JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKVUn7iM8FMEU24/giphy.gif" class="deco clock-gif">
+  </div>
   <div class="shelf" id="shelf-3">
-      <img src="https://i.pinimg.com/originals/1f/4e/ba/1f4eba6f27790b213ba570f8ba63273c.gif" class="plant-deco">
+    <img src="https://i.pinimg.com/originals/1f/4e/ba/1f4eba6f27790b213ba570f8ba63273c.gif" class="deco plant-gif">
   </div>
   <div class="shelf" id="shelf-4"></div>
 </div>
@@ -114,7 +114,6 @@
           const el = document.createElement('div');
           el.className = `book status-${book.status}`;
           el.title = book.title;
-          // Shorten title for spine
           el.innerText = book.title.length > 12 ? book.title.substring(0, 10) + '..' : book.title;
           shelf.appendChild(el);
         }
@@ -123,7 +122,6 @@
       console.error("Error loading books:", e);
     }
   }
-
   fetchBooks();
 </script>
 
