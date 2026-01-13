@@ -3,8 +3,8 @@
 <head>
   <style>
     :root {
-      --frame-color: #b68d6d; /* Main wood color */
-      --shelf-bg: #fffaf2;   /* Clean shelf background (No dots) */
+      --frame-color: #b68d6d; 
+      --shelf-bg: #fffaf2;   
       --book-read: #d8b08c;
       --book-reading: #a67c52;
       --book-tbr: #eed9c1;
@@ -15,55 +15,77 @@
       display: flex; 
       justify-content: center; 
       padding: 10px; 
-      font-family: 'Courier New', Courier, monospace; 
+      font-family: 'Arial', sans-serif; 
     }
 
     .bookcase {
       width: 100%;
-      max-width: 500px;
+      max-width: 450px;
       background: var(--frame-color);
       display: grid;
-      grid-template-rows: repeat(4, 1fr); /* 4 shelves */
-      gap: 12px;
-      padding: 15px;
-      border: 8px solid #a37a5a;
+      grid-template-rows: repeat(4, 1fr);
+      gap: 15px;
+      padding: 20px;
+      border: 10px solid #a37a5a;
       border-radius: 4px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
 
     .shelf {
-      height: 120px;
-      background-color: var(--shelf-bg); /* Dots removed here */
+      height: 130px;
+      background-color: var(--shelf-bg);
       border-bottom: 10px solid #a37a5a;
       display: flex;
       align-items: flex-end;
-      padding: 0 10px;
-      gap: 4px;
+      padding: 0 15px;
+      gap: 6px;
       position: relative;
     }
 
+    /* Clock Decoration on Shelf 2 */
+    .shelf#shelf-2::after {
+      content: '⏰';
+      position: absolute;
+      right: 15px;
+      bottom: 5px;
+      font-size: 35px;
+    }
+
+    /* Animated Plant Decoration on Shelf 3 */
+    .plant-deco {
+      position: absolute;
+      left: 50%;
+      bottom: 10px; /* Sits on the shelf */
+      transform: translateX(-50%);
+      width: 60px;  /* Adjust size as needed */
+      height: auto;
+      z-index: 5;
+    }
+
     .book {
-      width: 28px;
+      width: 32px;
       writing-mode: vertical-rl;
       text-align: center;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: bold;
       color: #5d4037;
       border: 1px solid rgba(0,0,0,0.1);
-      border-radius: 2px 2px 0 0;
+      border-radius: 3px 3px 0 0;
       transition: transform 0.2s;
       cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background-size: cover;
     }
 
-    .book:hover { transform: translateY(-10px); }
+    .book:hover { transform: translateY(-10px); z-index: 10; }
 
-    /* Color styles based on Notion Status */
-    .status-Read { background: var(--book-read); height: 80px; }
-    .status-Reading { background: var(--book-reading); height: 100px; color: white; }
-    .status-TBR { background: var(--book-tbr); height: 70px; }
-
-    /* Decorations like the image */
-    .shelf:nth-child(2)::after { content: '⏰'; position: absolute; right: 10px; bottom: 5px; font-size: 24px; }
-    .shelf:nth-child(3)::after { content: '🪴'; position: absolute; right: 40px; bottom: 5px; font-size: 20px; }
+    .status-Read { background: var(--book-read); height: 85px; }
+    .status-Reading { background: var(--book-reading); height: 110px; color: #fff; }
+    .status-TBR { background: var(--book-tbr); height: 75px; }
   </style>
 </head>
 <body>
@@ -71,27 +93,29 @@
 <div class="bookcase">
   <div class="shelf" id="shelf-1"></div>
   <div class="shelf" id="shelf-2"></div>
-  <div class="shelf" id="shelf-3"></div>
+  <div class="shelf" id="shelf-3">
+      <img src="https://i.pinimg.com/originals/1f/4e/ba/1f4eba6f27790b213ba570f8ba63273c.gif" class="plant-deco">
+  </div>
   <div class="shelf" id="shelf-4"></div>
 </div>
 
 <script>
   async function fetchBooks() {
-    // Replace the URL below with your Cloudflare Worker URL
-    const WORKER_URL = 'https://notion-bridge.violily67.workers.dev/';
+    // Replace with your Cloudflare Worker URL
+    const WORKER_URL = 'https://your-worker-name.workers.dev';
     
     try {
       const response = await fetch(WORKER_URL);
       const books = await response.json();
 
       books.forEach(book => {
-        // Find the correct shelf (1, 2, 3, or 4)
         const shelf = document.getElementById(`shelf-${book.shelf}`);
         if (shelf) {
           const el = document.createElement('div');
           el.className = `book status-${book.status}`;
           el.title = book.title;
-          el.innerText = book.title;
+          // Shorten title for spine
+          el.innerText = book.title.length > 12 ? book.title.substring(0, 10) + '..' : book.title;
           shelf.appendChild(el);
         }
       });
