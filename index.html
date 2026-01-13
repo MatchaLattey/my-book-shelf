@@ -5,12 +5,10 @@
     :root {
       --frame-color: #b68d6d; 
       --shelf-bg: #fffaf2;   
-      --db-primary: #0a3d4d;
     }
 
     body { background-color: transparent; display: flex; justify-content: center; padding: 10px; font-family: 'Segoe UI', sans-serif; }
     
-    /* SETTINGS MENU */
     #settings-container {
       position: fixed; top: 10px; right: 10px; z-index: 100;
       display: flex; flex-direction: column; align-items: flex-end;
@@ -39,42 +37,42 @@
       display: flex; align-items: flex-end; padding: 0 15px; gap: 6px; position: relative;
     }
     
-    /* THE DYNAMIC BOOK */
+    /* THE GHIBLI BOOK */
     .book {
       position: relative;
-      z-index: 10; /* Books stay in front of the background but behind floating deco if needed */
-      background-color: var(--db-primary);
-      background-image: radial-gradient(#20c20e 0.5px, transparent 0.5px), radial-gradient(#20c20e 0.5px, #0a3d4d 0.5px);
-      background-size: 8px 8px; background-position: 0 0, 4px 4px;
-      border: 1px solid rgba(255,255,255,0.2); border-radius: 3px 3px 0 0;
-      transition: transform 0.2s; cursor: pointer;
+      z-index: 10;
+      /* Soft textures instead of harsh circuit patterns */
+      background-image: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, transparent 10%, transparent 90%, rgba(0,0,0,0.1) 100%);
+      border: 1.5px solid rgba(0,0,0,0.1);
+      border-radius: 3px 3px 1px 1px;
+      transition: transform 0.2s;
+      cursor: pointer;
       display: flex; justify-content: center; align-items: center;
-      writing-mode: vertical-rl; font-size: 9px; font-weight: bold; color: white;
-      text-transform: uppercase; box-shadow: inset -3px 0 5px rgba(0,0,0,0.3);
+      writing-mode: vertical-rl;
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(0,0,0,0.7); /* Softer text color */
+      text-transform: capitalize;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
     }
     .book:hover { transform: translateY(-10px) scale(1.05) !important; z-index: 30; }
 
     /* SIZES */
-    .book-thin { width: 18px; height: 85px; font-size: 7px; }
-    .book-standard { width: 30px; height: 105px; }
-    .book-fat { width: 42px; height: 115px; }
+    .book-thin { width: 20px; height: 85px; font-size: 8px; }
+    .book-standard { width: 34px; height: 105px; }
+    .book-fat { width: 48px; height: 115px; }
 
-    /* DECORATIONS */
-    .deco { 
-      position: absolute; 
-      bottom: 5px; 
-      z-index: 5; /* Decorations now sit BEHIND the books */
-      pointer-events: none; 
-      opacity: 0.9;
-    }
+    /* DECORATIONS (Set behind books) */
+    .deco { position: absolute; bottom: 5px; z-index: 5; pointer-events: none; }
 
+    /* STATUS BADGE */
     .status-badge {
       position: absolute; bottom: 4px; right: 4px; width: 14px; height: 14px;
       border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center;
-      font-size: 10px; writing-mode: horizontal-tb; z-index: 11;
+      font-size: 10px; writing-mode: horizontal-tb; z-index: 11; border: 1px solid #ddd;
     }
-    .status-Read .status-badge::after { content: '✅'; }
-    .status-Reading .status-badge::after { content: '📖'; }
+    .status-Read .status-badge::after { content: '✨'; } /* Ghibli Sparkle */
+    .status-Reading .status-badge::after { content: '🌱'; } /* Ghibli Sprout */
   </style>
 </head>
 <body>
@@ -82,13 +80,13 @@
 <div id="settings-container">
   <div id="gear-icon">⚙️</div>
   <div id="settings-menu">
-    <div class="menu-header">Shelf Settings</div>
+    <div class="menu-header">Ghibli Shelf Settings</div>
     <div class="setting-item">
       <label>Wood Color</label>
       <input type="color" id="colorPicker" onchange="updateColor(this.value)">
     </div>
     <div class="setting-item">
-      <label>⏰ Item 1 (Right Side)</label>
+      <label>⏰ Right Decoration</label>
       <input type="text" id="clockUrlInput" placeholder="URL" onchange="updateDecoUrl('clock', this.value)">
       <select id="clockShelfSelect" onchange="moveDeco('clock', this.value)">
         <option value="1">Shelf 1</option><option value="2" selected>Shelf 2</option>
@@ -97,7 +95,7 @@
       <input type="range" id="clockSizeRange" min="20" max="150" value="45" oninput="resizeDeco('clock', this.value)">
     </div>
     <div class="setting-item">
-      <label>🪴 Item 2 (Left Side)</label>
+      <label>🪴 Left Decoration</label>
       <input type="text" id="plantUrlInput" placeholder="URL" onchange="updateDecoUrl('plant', this.value)">
       <select id="plantShelfSelect" onchange="moveDeco('plant', this.value)">
         <option value="1">Shelf 1</option><option value="2">Shelf 2</option>
@@ -125,19 +123,15 @@
     clockShelf: '2', plantShelf: '3', clockSize: '45', plantSize: '60'
   };
 
-  function updateColor(val) { document.documentElement.style.setProperty('--frame-color', val); config.color = val; }
-  
-  function resizeDeco(type, val) {
-    config[type + 'Size'] = val;
-    const img = document.getElementById(type + '-id');
-    if (img) img.style.width = val + 'px';
-  }
+  // Ghibli-inspired color palette
+  const ghibliPalette = [
+    '#e8d1b5', '#d9adad', '#b5c9c3', '#c7d6a5', 
+    '#dfc5e0', '#f4e3ad', '#a7c1d1', '#d2b48c'
+  ];
 
-  function updateDecoUrl(type, url) {
-    if (type === 'clock') config.clockImg = url;
-    else config.plantImg = url;
-    moveDeco(type, config[type + 'Shelf']);
-  }
+  function updateColor(val) { document.documentElement.style.setProperty('--frame-color', val); config.color = val; }
+  function resizeDeco(type, val) { config[type + 'Size'] = val; const img = document.getElementById(type + '-id'); if (img) img.style.width = val + 'px'; }
+  function updateDecoUrl(type, url) { if (type === 'clock') config.clockImg = url; else config.plantImg = url; moveDeco(type, config[type + 'Shelf']); }
 
   function moveDeco(type, shelfId) {
     config[type + 'Shelf'] = shelfId;
@@ -149,9 +143,7 @@
     img.src = type === 'clock' ? config.clockImg : config.plantImg;
     img.className = 'deco';
     img.style.width = config[type + 'Size'] + 'px';
-    // Logic to keep deco out of the way:
-    if (type === 'clock') img.style.right = '5px'; 
-    else img.style.left = '5px';
+    if (type === 'clock') img.style.right = '5px'; else img.style.left = '5px';
     shelf.appendChild(img);
   }
 
@@ -168,10 +160,16 @@
         const shelf = document.getElementById(`shelf-${book.shelf}`);
         if (shelf) {
           const el = document.createElement('div');
+          
+          // RANDOM SIZE
           const sizes = ['book-thin', 'book-standard', 'book-fat'];
           const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
           
+          // RANDOM GHIBLI COLOR
+          const randomColor = ghibliPalette[Math.floor(Math.random() * ghibliPalette.length)];
+          
           el.className = `book ${randomSize} status-${book.status}`;
+          el.style.backgroundColor = randomColor;
           el.innerText = book.title.substring(0, 10);
 
           const badge = document.createElement('div');
