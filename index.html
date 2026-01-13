@@ -1,0 +1,68 @@
+<div class="bookshelf-container">
+  <div class="shelf">
+    <div class="book status-read" title="The Great Gatsby">Gatsby</div>
+    <div class="book status-read" title="Atomic Habits">Habits</div>
+    
+    <div class="book status-reading" title="Dune">Dune</div>
+    
+    <div class="book status-tbr" title="1984">1984</div>
+    <div class="book status-tbr" title="Project Hail Mary">PHM</div>
+  </div>
+  
+  <div class="legend">
+    <span class="dot read"></span> Read
+    <span class="dot reading"></span> Reading
+    <span class="dot tbr"></span> To Read
+  </div>
+</div>
+
+<style>
+  .bookshelf-container {
+    background: #f4ece1;
+    padding: 20px;
+    border-radius: 8px;
+    width: fit-content;
+    font-family: sans-serif;
+  }
+
+  .shelf {
+    display: flex;
+    align-items: flex-end;
+    border-bottom: 8px solid #5d4037; /* The wood shelf */
+    padding-bottom: 2px;
+    gap: 5px;
+  }
+
+  .book {
+    width: 30px;
+    color: white;
+    font-size: 10px;
+    writing-mode: vertical-rl;
+    text-align: center;
+    padding: 10px 0;
+    border-radius: 3px 3px 0 0;
+    cursor: help;
+    transition: transform 0.2s;
+  }
+
+  .book:hover {
+    transform: translateY(-10px);
+  }
+
+  /* Status Colors */
+  .status-read { background: #2e7d32; height: 80px; }    /* Green */
+  .status-reading { background: #1976d2; height: 95px; } /* Blue */
+  .status-tbr { background: #ed6c02; height: 70px; }     /* Orange */
+
+  .legend {
+    margin-top: 15px;
+    font-size: 12px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
+  .read { background: #2e7d32; }
+  .reading { background: #1976d2; }
+  .tbr { background: #ed6c02; }
+</style>
