@@ -7,7 +7,7 @@
       --shelf-bg: #fffaf2;   
     }
 
-    body { background-color: transparent; display: flex; justify-content: center; padding: 10px; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: transparent; display: flex; justify-content: center; padding: 10px; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
     
     /* SETTINGS MENU */
     #settings-container {
@@ -22,36 +22,35 @@
     }
     #settings-container:hover #settings-menu { display: block; }
     .menu-header { font-weight: bold; font-size: 14px; margin-bottom: 10px; border-bottom: 2px solid #6b4f3a; color: #6b4f3a; display: flex; justify-content: space-between; }
-    
-    .setting-item { margin-bottom: 15px; padding-bottom: 5px; border-bottom: 1px solid #eee; }
-    .setting-item label { display: block; margin-bottom: 5px; font-weight: bold; }
-    
-    input[type="text"], select { width: 90%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 5px; }
-    input[type="range"] { width: 100%; cursor: pointer; }
-
     .sync-btn { padding: 4px 8px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 10px; }
-    .save-btn { width: 100%; padding: 10px; background: #2ecc71; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
 
     /* BOOKCASE */
     .bookcase {
-      width: 450px; background: var(--frame-color);
+      width: 90vw; max-width: 500px; background: var(--frame-color);
       display: grid; grid-template-rows: repeat(4, 1fr); gap: 15px;
       padding: 20px; border: 10px solid #a37a5a; border-radius: 4px;
     }
+    
     .shelf {
       height: 120px; background-color: var(--shelf-bg); border-bottom: 8px solid #a37a5a;
       display: flex; align-items: flex-end; padding: 0 10px; gap: 4px; position: relative;
-      /* FIX FOR BOOK LIMIT: Allows horizontal scrolling if books exceed width */
-      overflow-x: auto; overflow-y: hidden; white-space: nowrap;
+      /* SCROLLING ENABLED */
+      overflow-x: auto; 
+      overflow-y: hidden; 
+      white-space: nowrap;
+      cursor: grab; /* Shows user they can drag */
     }
     
-    /* Hide scrollbar but keep functionality */
-    .shelf::-webkit-scrollbar { height: 4px; }
-    .shelf::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+    .shelf:active { cursor: grabbing; }
+
+    /* VISIBLE SCROLLBAR */
+    .shelf::-webkit-scrollbar { height: 8px; }
+    .shelf::-webkit-scrollbar-track { background: #f1f1f1; }
+    .shelf::-webkit-scrollbar-thumb { background: #d2b48c; border-radius: 10px; }
 
     /* BOOKS */
     .book {
-      flex: 0 0 auto; /* Prevent books from shrinking */
+      flex: 0 0 auto; 
       position: relative;
       z-index: 10; 
       border: 1px solid rgba(0,0,0,0.1);
@@ -62,6 +61,7 @@
       font-size: 10px; font-weight: 800; color: #000;
       text-transform: uppercase;
       box-shadow: inset -2px 0 5px rgba(0,0,0,0.05);
+      user-select: none; /* Prevents text highlight while dragging */
     }
     .book:hover { transform: translateY(-10px) scale(1.1); z-index: 500 !important; }
 
@@ -72,7 +72,6 @@
     .tilt-left { transform: rotate(-6deg); transform-origin: bottom; margin-right: 4px; }
     .tilt-right { transform: rotate(6deg); transform-origin: bottom; margin-left: 4px; }
 
-    /* DECORATIONS - FRONT LAYER */
     .deco { position: absolute; bottom: 5px; z-index: 200; pointer-events: none; }
 
     .status-badge {
@@ -81,8 +80,6 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 9px; writing-mode: horizontal-tb; border: 1px solid #ccc;
     }
-    .status-Read .status-badge::after { content: '✨'; } 
-    .status-Reading .status-badge::after { content: '🌱'; }
   </style>
 </head>
 <body>
@@ -90,30 +87,8 @@
 <div id="settings-container">
   <div id="gear-icon">⚙️</div>
   <div id="settings-menu">
-    <div class="menu-header">
-      Shelf Settings
-      <button class="sync-btn" onclick="fetchBooks()">🔄 SYNC</button>
+    <div class="menu-header">Shelf Settings <button class="sync-btn" onclick="fetchBooks()">🔄 SYNC</button></div>
     </div>
-    
-    <div class="setting-item">
-      <label>Wood Color</label>
-      <input type="color" id="colorPicker" onchange="updateColor(this.value)">
-    </div>
-
-    <div class="setting-item">
-      <label>⏰ Right Item URL</label>
-      <input type="text" id="clockUrlInput" onchange="updateDecoUrl('clock', this.value)">
-      <input type="range" id="clockSizeRange" min="20" max="150" value="45" oninput="resizeDeco('clock', this.value)">
-    </div>
-
-    <div class="setting-item">
-      <label>🪴 Left Item URL</label>
-      <input type="text" id="plantUrlInput" onchange="updateDecoUrl('plant', this.value)">
-      <input type="range" id="plantSizeRange" min="20" max="150" value="60" oninput="resizeDeco('plant', this.value)">
-    </div>
-
-    <button class="save-btn" onclick="saveSettings()">💾 SAVE DESIGN</button>
-  </div>
 </div>
 
 <div class="bookcase">
@@ -124,56 +99,46 @@
 </div>
 
 <script>
-  let config = {
-    workerUrl: 'https://notion-bridge.violily67.workers.dev/', 
-    color: '#b68d6d',
-    clockImg: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3B4eW13bmZ5ZnR4eW13bmZ5ZnR4eW13bmZ5ZnR4eW13bmZ5JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKVUn7iM8FMEU24/giphy.gif',
-    plantImg: 'https://i.pinimg.com/originals/1f/4e/ba/1f4eba6f27790b213ba570f8ba63273c.gif',
-    clockShelf: '2', plantShelf: '3', clockSize: '45', plantSize: '60'
-  };
-
+  // ... existing config ...
   const ghibliPalette = ['#e8d1b5', '#d9adad', '#b5c9c3', '#c7d6a5', '#dfc5e0', '#f4e3ad', '#a7c1d1', '#d2b48c'];
 
-  function updateColor(val) { config.color = val; document.documentElement.style.setProperty('--frame-color', val); }
-  function resizeDeco(type, val) { config[type + 'Size'] = val; const img = document.getElementById(type + '-id'); if (img) img.style.width = val + 'px'; }
-  function updateDecoUrl(type, url) { if (type === 'clock') config.clockImg = url; else config.plantImg = url; moveDeco(type, config[type + 'Shelf']); }
+  // CLICK AND DRAG SCROLL LOGIC
+  document.querySelectorAll('.shelf').forEach(shelf => {
+    let isDown = false;
+    let startX;
+    let scrollLeft;
 
-  function moveDeco(type, shelfId) {
-    const old = document.getElementById(type + '-id'); if (old) old.remove();
-    const shelf = document.getElementById(`shelf-${shelfId}`);
-    if(!shelf) return;
-    const img = document.createElement('img');
-    img.id = type + '-id';
-    img.src = type === 'clock' ? config.clockImg : config.plantImg;
-    img.className = 'deco';
-    img.style.width = config[type + 'Size'] + 'px';
-    if (type === 'clock') img.style.right = '10px'; else img.style.left = '10px';
-    shelf.appendChild(img);
-  }
-
-  function saveSettings() { localStorage.setItem('ghibli_shelf_cfg', JSON.stringify(config)); alert("Saved!"); }
+    shelf.addEventListener('mousedown', (e) => {
+      isDown = true;
+      startX = e.pageX - shelf.offsetLeft;
+      scrollLeft = shelf.scrollLeft;
+    });
+    shelf.addEventListener('mouseleave', () => isDown = false);
+    shelf.addEventListener('mouseup', () => isDown = false);
+    shelf.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - shelf.offsetLeft;
+      const walk = (x - startX) * 2; // Scroll speed
+      shelf.scrollLeft = scrollLeft - walk;
+    });
+  });
 
   async function fetchBooks() {
     try {
-      // Fast Data Fetch (Cache Buster)
-      const response = await fetch(`${config.workerUrl}?t=${new Date().getTime()}`);
+      const response = await fetch(`https://notion-bridge.violily67.workers.dev/?t=${Date.now()}`);
       const books = await response.json();
-      
       document.querySelectorAll('.book').forEach(b => b.remove());
-      moveDeco('clock', config.clockShelf);
-      moveDeco('plant', config.plantShelf);
-
+      
       books.forEach(book => {
         const shelf = document.getElementById(`shelf-${book.shelf}`);
         if (shelf) {
           const el = document.createElement('div');
           const sizeClass = ['book-thin', 'book-standard', 'book-fat'][Math.floor(Math.random() * 3)];
           const tiltClass = ['', 'tilt-left', 'tilt-right'][Math.floor(Math.random() * 3)];
-          
           el.className = `book ${sizeClass} ${tiltClass} status-${book.status}`;
           el.style.backgroundColor = ghibliPalette[Math.floor(Math.random() * ghibliPalette.length)];
           el.innerText = book.title.substring(0, 10);
-          
           const badge = document.createElement('div');
           badge.className = 'status-badge';
           el.appendChild(badge);
