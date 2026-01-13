@@ -9,7 +9,7 @@
 
     body { background-color: transparent; display: flex; justify-content: center; padding: 10px; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
     
-    /* SETTINGS MENU */
+    /* SETTINGS MENU - PRESERVED */
     #settings-container {
       position: fixed; top: 10px; right: 10px; z-index: 1000;
       display: flex; flex-direction: column; align-items: flex-end;
@@ -29,10 +29,9 @@
     input[type="text"], select { width: 92%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 8px; font-size: 11px; }
     .slider-label { font-size: 10px; color: #666; display: flex; justify-content: space-between; }
     input[type="range"] { width: 100%; cursor: pointer; margin-top: 5px; }
-
     .save-btn { width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
-    /* BOOKCASE */
+    /* BOOKCASE & SHELF */
     .bookcase {
       width: 450px; background: var(--frame-color);
       display: grid; grid-template-rows: repeat(4, 1fr); gap: 15px;
@@ -47,7 +46,7 @@
     .shelf::-webkit-scrollbar { height: 6px; }
     .shelf::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
 
-    /* BOOKS */
+    /* BOOKS - POP TO FRONT ON HOVER */
     .book {
       flex: 0 0 auto; position: relative; z-index: 10; 
       border: 1px solid rgba(0,0,0,0.1); border-radius: 2px 2px 0 0;
@@ -58,28 +57,28 @@
     }
     .book:hover { transform: translateY(-10px) scale(1.1); z-index: 500 !important; }
 
-    /* BOOK SIZES & TILTS */
     .book-thin { width: 22px; height: 80px; }
     .book-standard { width: 34px; height: 95px; }
     .book-fat { width: 48px; height: 110px; }
     .tilt-left { transform: rotate(-6deg); transform-origin: bottom; margin-right: 4px; }
     .tilt-right { transform: rotate(6deg); transform-origin: bottom; margin-left: 4px; }
 
-    /* STATUS BADGE - FIXED VISIBILITY */
+    /* STATUS BADGE - FIXED TO MATCH YOUR NOTION */
     .status-badge {
       position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
-      width: 16px; height: 16px; border-radius: 50%; background: white;
+      width: 17px; height: 17px; border-radius: 50%; background: white;
       display: flex; align-items: center; justify-content: center;
-      font-size: 10px; writing-mode: horizontal-tb; border: 1.5px solid #6b4f3a;
+      font-size: 11px; writing-mode: horizontal-tb; border: 1.5px solid #6b4f3a;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 20;
     }
 
-    /* Status Emoji Assignments */
-    .status-Read .status-badge::after { content: '✨'; } 
+    /* MAPPING YOUR STATUSES TO EMOJIS */
+    .status-Done .status-badge::after { content: '✨'; } 
     .status-Reading .status-badge::after { content: '🌱'; }
-    .status-Unfinished .status-badge::after { content: '⏳'; }
+    .status-on-going .status-badge::after { content: '📖'; }
+    .status-ToRead .status-badge::after { content: '⏳'; }
 
-    /* DECORATIONS */
+    /* DECORATIONS - STAY AT FRONT */
     .deco { position: absolute; bottom: 5px; z-index: 200; pointer-events: none; }
   </style>
 </head>
@@ -89,12 +88,10 @@
   <div id="gear-icon">⚙️</div>
   <div id="settings-menu">
     <div class="menu-header">Shelf Settings <button class="sync-btn" onclick="fetchBooks()">🔄 SYNC</button></div>
-    
     <div class="setting-item">
       <label>Wood Color</label>
       <input type="color" id="colorPicker" onchange="updateColor(this.value)">
     </div>
-
     <div class="setting-item">
       <label>⏰ Right Item</label>
       <input type="text" id="clockUrlInput" placeholder="Image URL" onchange="updateDecoUrl('clock', this.value)">
@@ -105,7 +102,6 @@
       <div class="slider-label"><span>Size</span><span id="clockSizeVal">45px</span></div>
       <input type="range" id="clockSizeRange" min="20" max="200" value="45" oninput="resizeDeco('clock', this.value)">
     </div>
-
     <div class="setting-item">
       <label>🪴 Left Item</label>
       <input type="text" id="plantUrlInput" placeholder="Image URL" onchange="updateDecoUrl('plant', this.value)">
@@ -116,7 +112,6 @@
       <div class="slider-label"><span>Size</span><span id="plantSizeVal">60px</span></div>
       <input type="range" id="plantSizeRange" min="20" max="200" value="60" oninput="resizeDeco('plant', this.value)">
     </div>
-
     <button class="save-btn" onclick="saveSettings()">💾 SAVE DESIGN</button>
   </div>
 </div>
@@ -202,7 +197,7 @@
           const sizeClass = ['book-thin', 'book-standard', 'book-fat'][Math.floor(Math.random() * 3)];
           const tiltClass = ['', 'tilt-left', 'tilt-right'][Math.floor(Math.random() * 3)];
           
-          // CRITICAL: Clean the status string to match CSS classes
+          // Matches your Notion Status names
           const cleanStatus = book.status.replace(/\s+/g, '');
           el.className = `book ${sizeClass} ${tiltClass} status-${cleanStatus}`;
           
