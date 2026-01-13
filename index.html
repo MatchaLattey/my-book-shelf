@@ -1,25 +1,107 @@
-body { 
-  background-color: #fdf6ed; /* Warm cream background */
-}
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    :root {
+      --frame-color: #b68d6d; /* Main wood color */
+      --shelf-bg: #fffaf2;   /* Clean shelf background (No dots) */
+      --book-read: #d8b08c;
+      --book-reading: #a67c52;
+      --book-tbr: #eed9c1;
+    }
 
-.bookcase {
-  display: grid;
-  grid-template-rows: repeat(4, 1fr); /* Creates the 4 shelves */
-  gap: 10px;
-  background: #b68d6d; /* Wood frame color */
-  padding: 15px;
-  border: 10px solid #a37a5a;
-  box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
-}
+    body { 
+      background-color: transparent; 
+      display: flex; 
+      justify-content: center; 
+      padding: 10px; 
+      font-family: 'Courier New', Courier, monospace; 
+    }
 
-.shelf {
-  background-color: #fffaf2;
-  background-image: radial-gradient(#e6e0d5 1px, transparent 1px);
-  background-size: 20px 20px; /* The grid pattern from your image */
-  height: 120px;
-  border-bottom: 8px solid #a37a5a;
-  display: flex;
-  align-items: flex-end;
-  padding-left: 10px;
-  position: relative;
-}
+    .bookcase {
+      width: 100%;
+      max-width: 500px;
+      background: var(--frame-color);
+      display: grid;
+      grid-template-rows: repeat(4, 1fr); /* 4 shelves */
+      gap: 12px;
+      padding: 15px;
+      border: 8px solid #a37a5a;
+      border-radius: 4px;
+    }
+
+    .shelf {
+      height: 120px;
+      background-color: var(--shelf-bg); /* Dots removed here */
+      border-bottom: 10px solid #a37a5a;
+      display: flex;
+      align-items: flex-end;
+      padding: 0 10px;
+      gap: 4px;
+      position: relative;
+    }
+
+    .book {
+      width: 28px;
+      writing-mode: vertical-rl;
+      text-align: center;
+      font-size: 10px;
+      font-weight: bold;
+      color: #5d4037;
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 2px 2px 0 0;
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+
+    .book:hover { transform: translateY(-10px); }
+
+    /* Color styles based on Notion Status */
+    .status-Read { background: var(--book-read); height: 80px; }
+    .status-Reading { background: var(--book-reading); height: 100px; color: white; }
+    .status-TBR { background: var(--book-tbr); height: 70px; }
+
+    /* Decorations like the image */
+    .shelf:nth-child(2)::after { content: '⏰'; position: absolute; right: 10px; bottom: 5px; font-size: 24px; }
+    .shelf:nth-child(3)::after { content: '🪴'; position: absolute; right: 40px; bottom: 5px; font-size: 20px; }
+  </style>
+</head>
+<body>
+
+<div class="bookcase">
+  <div class="shelf" id="shelf-1"></div>
+  <div class="shelf" id="shelf-2"></div>
+  <div class="shelf" id="shelf-3"></div>
+  <div class="shelf" id="shelf-4"></div>
+</div>
+
+<script>
+  async function fetchBooks() {
+    // Replace the URL below with your Cloudflare Worker URL
+    const WORKER_URL = 'https://your-worker-name.workers.dev';
+    
+    try {
+      const response = await fetch(WORKER_URL);
+      const books = await response.json();
+
+      books.forEach(book => {
+        // Find the correct shelf (1, 2, 3, or 4)
+        const shelf = document.getElementById(`shelf-${book.shelf}`);
+        if (shelf) {
+          const el = document.createElement('div');
+          el.className = `book status-${book.status}`;
+          el.title = book.title;
+          el.innerText = book.title;
+          shelf.appendChild(el);
+        }
+      });
+    } catch (e) {
+      console.error("Error loading books:", e);
+    }
+  }
+
+  fetchBooks();
+</script>
+
+</body>
+</html>
