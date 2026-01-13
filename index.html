@@ -6,7 +6,6 @@
       --frame-color: #b68d6d; 
       --shelf-bg: #fffaf2;   
       --db-primary: #0a3d4d;
-      --db-accent: #20c20e;
     }
 
     body { background-color: transparent; display: flex; justify-content: center; padding: 10px; font-family: 'Segoe UI', sans-serif; }
@@ -23,18 +22,11 @@
       font-size: 12px; max-height: 80vh; overflow-y: auto;
     }
     #settings-container:hover #settings-menu { display: block; }
-
-    .menu-header { font-weight: bold; font-size: 14px; margin-bottom: 15px; border-bottom: 2px solid #6b4f3a; padding-bottom: 5px; color: #6b4f3a; }
     .setting-item { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
-    .setting-item label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
-    
+    .setting-item label { display: block; margin-bottom: 5px; font-weight: bold; }
     select, input[type="text"] { width: 90%; padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 11px; margin-bottom: 8px; }
-    input[type="range"] { width: 90%; margin-top: 5px; cursor: pointer; }
-
-    .save-btn {
-      width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; 
-      border-radius: 6px; cursor: pointer; font-weight: bold;
-    }
+    input[type="range"] { width: 90%; margin-top: 5px; }
+    .save-btn { width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
     /* BOOKCASE */
     .bookcase {
@@ -50,6 +42,7 @@
     /* THE DYNAMIC BOOK */
     .book {
       position: relative;
+      z-index: 10; /* Books stay in front of the background but behind floating deco if needed */
       background-color: var(--db-primary);
       background-image: radial-gradient(#20c20e 0.5px, transparent 0.5px), radial-gradient(#20c20e 0.5px, #0a3d4d 0.5px);
       background-size: 8px 8px; background-position: 0 0, 4px 4px;
@@ -59,28 +52,29 @@
       writing-mode: vertical-rl; font-size: 9px; font-weight: bold; color: white;
       text-transform: uppercase; box-shadow: inset -3px 0 5px rgba(0,0,0,0.3);
     }
-    .book:hover { transform: translateY(-10px) scale(1.05) !important; z-index: 20; }
+    .book:hover { transform: translateY(-10px) scale(1.05) !important; z-index: 30; }
 
-    /* BOOK SIZES */
+    /* SIZES */
     .book-thin { width: 18px; height: 85px; font-size: 7px; }
     .book-standard { width: 30px; height: 105px; }
-    .book-fat { width: 42px; height: 115px; border-left: 3px solid rgba(255,255,255,0.2); }
+    .book-fat { width: 42px; height: 115px; }
 
-    /* TILT CLASSES */
-    .tilt-left { transform: rotate(-5deg); transform-origin: bottom; }
-    .tilt-right { transform: rotate(5deg); transform-origin: bottom; }
+    /* DECORATIONS */
+    .deco { 
+      position: absolute; 
+      bottom: 5px; 
+      z-index: 5; /* Decorations now sit BEHIND the books */
+      pointer-events: none; 
+      opacity: 0.9;
+    }
 
-    /* STATUS ICONS */
     .status-badge {
       position: absolute; bottom: 4px; right: 4px; width: 14px; height: 14px;
       border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center;
-      font-size: 10px; writing-mode: horizontal-tb; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      font-size: 10px; writing-mode: horizontal-tb; z-index: 11;
     }
     .status-Read .status-badge::after { content: '✅'; }
     .status-Reading .status-badge::after { content: '📖'; }
-    .status-TBR .status-badge { display: none; }
-
-    .deco { position: absolute; bottom: 5px; z-index: 5; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -89,37 +83,29 @@
   <div id="gear-icon">⚙️</div>
   <div id="settings-menu">
     <div class="menu-header">Shelf Settings</div>
-    
     <div class="setting-item">
       <label>Wood Color</label>
       <input type="color" id="colorPicker" onchange="updateColor(this.value)">
     </div>
-    
     <div class="setting-item">
-      <label>⏰ Item 1 (Clock)</label>
-      <input type="text" id="clockUrlInput" placeholder="Paste Image URL" onchange="updateDecoUrl('clock', this.value)">
+      <label>⏰ Item 1 (Right Side)</label>
+      <input type="text" id="clockUrlInput" placeholder="URL" onchange="updateDecoUrl('clock', this.value)">
       <select id="clockShelfSelect" onchange="moveDeco('clock', this.value)">
-        <option value="1">Shelf 1</option><option value="2">Shelf 2</option>
+        <option value="1">Shelf 1</option><option value="2" selected>Shelf 2</option>
         <option value="3">Shelf 3</option><option value="4">Shelf 4</option>
-        <option value="none">Hidden</option>
       </select>
-      <label style="font-weight:normal; font-size:10px;">Size Adjust</label>
-      <input type="range" id="clockSizeRange" min="20" max="150" oninput="resizeDeco('clock', this.value)">
+      <input type="range" id="clockSizeRange" min="20" max="150" value="45" oninput="resizeDeco('clock', this.value)">
     </div>
-
     <div class="setting-item">
-      <label>🪴 Item 2 (Plant)</label>
-      <input type="text" id="plantUrlInput" placeholder="Paste Image URL" onchange="updateDecoUrl('plant', this.value)">
+      <label>🪴 Item 2 (Left Side)</label>
+      <input type="text" id="plantUrlInput" placeholder="URL" onchange="updateDecoUrl('plant', this.value)">
       <select id="plantShelfSelect" onchange="moveDeco('plant', this.value)">
         <option value="1">Shelf 1</option><option value="2">Shelf 2</option>
-        <option value="3">Shelf 3</option><option value="4">Shelf 4</option>
-        <option value="none">Hidden</option>
+        <option value="3" selected>Shelf 3</option><option value="4">Shelf 4</option>
       </select>
-      <label style="font-weight:normal; font-size:10px;">Size Adjust</label>
-      <input type="range" id="plantSizeRange" min="20" max="150" oninput="resizeDeco('plant', this.value)">
+      <input type="range" id="plantSizeRange" min="20" max="150" value="60" oninput="resizeDeco('plant', this.value)">
     </div>
-
-    <button class="save-btn" onclick="saveSettings()">💾 SAVE MY DESIGN</button>
+    <button class="save-btn" onclick="saveSettings()">💾 SAVE DESIGN</button>
   </div>
 </div>
 
@@ -139,31 +125,8 @@
     clockShelf: '2', plantShelf: '3', clockSize: '45', plantSize: '60'
   };
 
-  function loadSettings() {
-    const saved = localStorage.getItem('bookshelf_settings');
-    if (saved) {
-      config = JSON.parse(saved);
-      document.getElementById('colorPicker').value = config.color;
-      document.getElementById('clockUrlInput').value = config.clockImg;
-      document.getElementById('plantUrlInput').value = config.plantImg;
-      document.getElementById('clockShelfSelect').value = config.clockShelf;
-      document.getElementById('plantShelfSelect').value = config.plantShelf;
-      document.getElementById('clockSizeRange').value = config.clockSize;
-      document.getElementById('plantSizeRange').value = config.plantSize;
-      updateColor(config.color);
-    }
-  }
-
-  function saveSettings() {
-    localStorage.setItem('bookshelf_settings', JSON.stringify(config));
-    alert("Saved! Your design is now locked in.");
-  }
-
-  function updateColor(val) { 
-    config.color = val;
-    document.documentElement.style.setProperty('--frame-color', val); 
-  }
-
+  function updateColor(val) { document.documentElement.style.setProperty('--frame-color', val); config.color = val; }
+  
   function resizeDeco(type, val) {
     config[type + 'Size'] = val;
     const img = document.getElementById(type + '-id');
@@ -171,9 +134,8 @@
   }
 
   function updateDecoUrl(type, url) {
-    if (!url) return;
     if (type === 'clock') config.clockImg = url;
-    if (type === 'plant') config.plantImg = url;
+    else config.plantImg = url;
     moveDeco(type, config[type + 'Shelf']);
   }
 
@@ -181,26 +143,22 @@
     config[type + 'Shelf'] = shelfId;
     const old = document.getElementById(type + '-id');
     if (old) old.remove();
-    if (shelfId === 'none') return;
-
     const shelf = document.getElementById(`shelf-${shelfId}`);
     const img = document.createElement('img');
     img.id = type + '-id';
     img.src = type === 'clock' ? config.clockImg : config.plantImg;
     img.className = 'deco';
     img.style.width = config[type + 'Size'] + 'px';
-    if (type === 'clock') img.style.right = '10px'; 
-    else { img.style.left = '10px'; }
+    // Logic to keep deco out of the way:
+    if (type === 'clock') img.style.right = '5px'; 
+    else img.style.left = '5px';
     shelf.appendChild(img);
   }
 
   async function fetchBooks() {
-    loadSettings();
     try {
       const response = await fetch(config.workerUrl);
       const books = await response.json();
-      
-      // Clear ONLY books, leave decorations
       document.querySelectorAll('.book').forEach(b => b.remove());
       
       moveDeco('clock', config.clockShelf);
@@ -210,25 +168,19 @@
         const shelf = document.getElementById(`shelf-${book.shelf}`);
         if (shelf) {
           const el = document.createElement('div');
-          
-          // Automatic size and tilt
           const sizes = ['book-thin', 'book-standard', 'book-fat'];
-          const tilts = ['', 'tilt-left', 'tilt-right', '']; 
           const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
-          const randomTilt = tilts[Math.floor(Math.random() * tilts.length)];
           
-          el.className = `book ${randomSize} ${randomTilt} status-${book.status}`;
-          el.title = book.title;
+          el.className = `book ${randomSize} status-${book.status}`;
           el.innerText = book.title.substring(0, 10);
 
           const badge = document.createElement('div');
           badge.className = 'status-badge';
           el.appendChild(badge);
-
           shelf.appendChild(el);
         }
       });
-    } catch (e) { console.error("Error:", e); }
+    } catch (e) { console.error(e); }
   }
 
   fetchBooks();
