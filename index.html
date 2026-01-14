@@ -5,7 +5,7 @@
     :root { --frame-color: #b68d6d; --shelf-bg: #fffaf2; }
     body { background-color: transparent; display: flex; justify-content: center; padding: 10px; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
     
-    /* SETTINGS MENU - FULLY RESTORED */
+    /* SETTINGS MENU */
     #settings-container { position: fixed; top: 10px; right: 10px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; }
     #gear-icon { font-size: 24px; cursor: pointer; background: white; border-radius: 50%; padding: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
     #settings-menu { display: none; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); width: 250px; margin-top: 8px; font-size: 12px; max-height: 85vh; overflow-y: auto; }
@@ -18,21 +18,20 @@
     input[type="range"] { width: 100%; cursor: pointer; margin-top: 5px; }
     .save-btn { width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
-    /* BOOKCASE - OVERFLOW HIDDEN STOPS LEAKING */
+    /* BOOKCASE & SHELF */
     .bookcase { 
       width: 450px; background: var(--frame-color); 
       display: grid; grid-template-rows: repeat(4, 1fr); gap: 20px; 
       padding: 20px; border: 10px solid #a37a5a; border-radius: 4px;
       overflow: hidden; 
     }
-
     .shelf { 
       height: 140px; background-color: var(--shelf-bg); border-bottom: 8px solid #a37a5a; 
       display: flex; align-items: flex-end; padding: 0 15px; gap: 2px; position: relative; 
       overflow-x: auto; overflow-y: hidden; white-space: nowrap; cursor: grab;
     }
 
-    /* BOOKS - SMART TILT & FULL WRAPPING */
+    /* BOOKS - WRAPPING & TILT ORIGIN */
     .book { 
       flex: 0 0 auto; position: relative; z-index: 10; 
       border: 1px solid rgba(0,0,0,0.1); border-radius: 2px 2px 0 0;
@@ -40,21 +39,20 @@
       display: flex; justify-content: center; align-items: center;
       writing-mode: vertical-rl; text-orientation: mixed;
       font-size: 9px; font-weight: 800; color: #333;
-      text-transform: uppercase; padding: 15px 4px;
+      text-transform: uppercase; padding: 12px 4px;
       box-shadow: inset -2px 0 5px rgba(0,0,0,0.05); 
       white-space: normal; text-align: center;
-      line-height: 1.2; word-break: break-word;
-      transform-origin: bottom;
+      line-height: 1.1; word-break: break-word;
+      transform-origin: bottom center; /* Required for tilt to work */
     }
-    
     .book:hover { transform: translateY(-5px) scale(1.05) rotate(0deg) !important; z-index: 500 !important; }
 
-    /* TILT CLASSES */
-    .tilt-left-strong { transform: rotate(-7deg); margin-right: 4px; }
-    .tilt-left-soft { transform: rotate(-3deg); margin-right: 2px; }
-    .tilt-right-strong { transform: rotate(7deg); margin-left: 4px; }
-    .tilt-right-soft { transform: rotate(3deg); margin-left: 2px; }
-    .tilt-none { transform: rotate(0deg); }
+    /* SMART TILT CLASSES - FORCED VIA !IMPORTANT TO PREVENT OVERWRITE */
+    .tilt-left-strong { transform: rotate(-7deg) !important; margin-right: 4px; }
+    .tilt-left-soft { transform: rotate(-3deg) !important; margin-right: 2px; }
+    .tilt-right-strong { transform: rotate(7deg) !important; margin-left: 4px; }
+    .tilt-right-soft { transform: rotate(3deg) !important; margin-left: 2px; }
+    .tilt-none { transform: rotate(0deg) !important; }
 
     .status-badge {
       position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
@@ -64,8 +62,8 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 20;
     }
 
-    .book-thin { width: 22px; height: 95px; }
-    .book-standard { width: 34px; height: 110px; }
+    .book-thin { width: 22px; height: 90px; }
+    .book-standard { width: 34px; height: 105px; }
     .book-fat { width: 46px; height: 120px; }
     .deco { position: absolute; bottom: 5px; z-index: 200; pointer-events: none; }
   </style>
@@ -98,10 +96,8 @@
 </div>
 
 <div class="bookcase">
-  <div id="shelf-1" class="shelf"></div>
-  <div id="shelf-2" class="shelf"></div>
-  <div id="shelf-3" class="shelf"></div>
-  <div id="shelf-4" class="shelf"></div>
+  <div id="shelf-1" class="shelf"></div><div id="shelf-2" class="shelf"></div>
+  <div id="shelf-3" class="shelf"></div><div id="shelf-4" class="shelf"></div>
 </div>
 
 <script>
@@ -117,11 +113,7 @@
 
   function loadSettings() {
     const saved = localStorage.getItem('ghibli_shelf_cfg');
-    if (saved) {
-      config = JSON.parse(saved);
-      document.getElementById('colorPicker').value = config.color;
-      updateColor(config.color);
-    }
+    if (saved) { config = JSON.parse(saved); updateColor(config.color); }
   }
 
   function updateColor(val) { config.color = val; document.documentElement.style.setProperty('--frame-color', val); }
@@ -154,12 +146,16 @@
     return "";
   }
 
+  // UPDATED SMART TILT LOGIC
   function getSmartTilt(index, total) {
+    if (total <= 1) return 'tilt-none';
     if (index === 0) return 'tilt-left-strong';
     if (index === total - 1) return 'tilt-right-strong';
-    const pattern = index % 5;
+    
+    // Group leans
+    const pattern = index % 4;
     if (pattern === 1) return 'tilt-left-soft';
-    if (pattern === 3) return 'tilt-right-soft';
+    if (pattern === 2) return 'tilt-right-soft';
     return 'tilt-none';
   }
 
@@ -179,6 +175,8 @@
         shelfBooks.forEach((book, index) => {
           const el = document.createElement('div');
           const sizes = ['book-thin', 'book-standard', 'book-fat'];
+          
+          // SMART TILT APPLICATION
           const tiltClass = getSmartTilt(index, shelfBooks.length);
           
           el.className = `book ${sizes[Math.floor(Math.random()*3)]} ${tiltClass}`;
